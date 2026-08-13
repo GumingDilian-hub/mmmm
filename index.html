@@ -1,1263 +1,480 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SBTI 人格测试</title>
-    <style>
-        /* ===== 全局重置 & 字体 ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
-            background: #e6e9ed;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 20px;
-        }
-
-        /* ===== Windows 10 窗口 ===== */
-        .window {
-            width: 680px;
-            max-width: 94vw;
-            min-height: 420px;
-            background: #ffffff;
-            border: 1px solid #b0b0b0;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            transition: min-height 0.2s;
-        }
-
-        /* ===== 标题栏 ===== */
-        .title-bar {
-            background: #0078d7;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 6px 0 14px;
-            flex-shrink: 0;
-            user-select: none;
-        }
-
-        .title-bar .title {
-            color: #ffffff;
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .title-bar .title .icon {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            background: #ffffff;
-            border-radius: 2px;
-            font-size: 10px;
-            line-height: 16px;
-            text-align: center;
-            color: #0078d7;
-            font-weight: 700;
-        }
-
-        .window-controls {
-            display: flex;
-            height: 100%;
-            align-items: center;
-        }
-
-        .window-controls span {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 46px;
-            height: 100%;
-            color: #ffffff;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.1s;
-            font-family: 'Segoe UI', 'Arial', sans-serif;
-        }
-
-        .window-controls span:hover {
-            background: rgba(255, 255, 255, 0.18);
-        }
-
-        .window-controls .close:hover {
-            background: #e81123;
-        }
-
-        /* ===== 内容区域 ===== */
-        .content {
-            padding: 26px 32px 30px 32px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 280px;
-            position: relative;
-        }
-
-        /* ===== 进度条 ===== */
-        .progress-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 22px;
-            font-size: 13px;
-            color: #444;
-            border-bottom: 1px solid #eaeaea;
-            padding-bottom: 12px;
-        }
-
-        .progress-area .step-num {
-            background: #0078d7;
-            color: #fff;
-            padding: 0 10px;
-            border-radius: 0;
-            font-size: 12px;
-            font-weight: 600;
-            line-height: 24px;
-            letter-spacing: 0.3px;
-        }
-
-        .progress-area .step-label {
-            color: #333;
-            font-weight: 400;
-        }
-
-        .progress-bar-track {
-            flex: 1;
-            height: 4px;
-            background: #d0d0d0;
-            margin-left: 6px;
-            border-radius: 0;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: #0078d7;
-            width: 0%;
-            transition: width 0.25s ease;
-            border-radius: 0;
-        }
-
-        /* ===== 问题区 ===== */
-        #question-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        #question-text {
-            font-size: 18px;
-            font-weight: 400;
-            color: #1a1a1a;
-            line-height: 1.6;
-            margin-bottom: 28px;
-            padding: 4px 0;
-            min-height: 60px;
-        }
-
-        #question-text .q-number {
-            color: #0078d7;
-            font-weight: 600;
-            margin-right: 6px;
-        }
-
-        .options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px 14px;
-            margin-top: 4px;
-        }
-
-        .options .opt-btn {
-            background: #f5f5f5;
-            border: 1px solid #d0d0d0;
-            padding: 8px 22px;
-            font-size: 15px;
-            font-family: inherit;
-            color: #1a1a1a;
-            cursor: pointer;
-            transition: background 0.12s, border-color 0.12s;
-            border-radius: 0;
-            min-width: 80px;
-            text-align: left;
-        }
-
-        .options .opt-btn:hover {
-            background: #e8e8e8;
-            border-color: #b0b0b0;
-        }
-
-        .options .opt-btn:active {
-            background: #d0d0d0;
-        }
-
-        .options .opt-btn.selected {
-            background: #0078d7;
-            border-color: #0078d7;
-            color: #ffffff;
-        }
-
-        /* ===== 输入框问题 ===== */
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            margin-top: 6px;
-        }
-
-        .input-group input[type="text"] {
-            padding: 10px 14px;
-            font-size: 15px;
-            font-family: inherit;
-            border: 1px solid #c0c0c0;
-            border-radius: 0;
-            outline: none;
-            transition: border-color 0.15s;
-            background: #fafafa;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .input-group input[type="text"]:focus {
-            border-color: #0078d7;
-            background: #ffffff;
-        }
-
-        .input-group .confirm-btn {
-            background: #0078d7;
-            border: none;
-            color: #ffffff;
-            padding: 8px 28px;
-            font-size: 15px;
-            font-family: inherit;
-            cursor: pointer;
-            transition: background 0.12s;
-            border-radius: 0;
-            align-self: flex-start;
-        }
-
-        .input-group .confirm-btn:hover {
-            background: #005a9e;
-        }
-
-        .input-group .confirm-btn:active {
-            background: #00457a;
-        }
-
-        /* ===== 结果区 ===== */
-        #result-area {
-            flex: 1;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        #result-area.show {
-            display: flex;
-        }
-
-        #result-text {
-            font-size: 26px;
-            font-weight: 500;
-            color: #1a1a1a;
-            line-height: 1.5;
-            margin-bottom: 28px;
-            word-break: break-word;
-            padding: 0 10px;
-        }
-
-        #result-text .result-label {
-            font-size: 18px;
-            font-weight: 400;
-            color: #555;
-        }
-
-        #result-text .result-value {
-            font-weight: 600;
-            color: #0078d7;
-            display: block;
-            margin-top: 10px;
-            font-size: 30px;
-        }
-
-        .result-actions {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 6px;
-        }
-
-        .result-actions button {
-            background: #0078d7;
-            border: none;
-            color: #ffffff;
-            padding: 8px 30px;
-            font-size: 15px;
-            font-family: inherit;
-            cursor: pointer;
-            transition: background 0.12s;
-            border-radius: 0;
-        }
-
-        .result-actions button:hover {
-            background: #005a9e;
-        }
-
-        .result-actions button:active {
-            background: #00457a;
-        }
-
-        .result-actions button.secondary {
-            background: #e6e6e6;
-            color: #1a1a1a;
-            border: 1px solid #c0c0c0;
-        }
-
-        .result-actions button.secondary:hover {
-            background: #d5d5d5;
-        }
-
-        /* ===== 覆盖层（禁止访问 / 咩咩咩覆盖） ===== */
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.92);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 20;
-            padding: 30px;
-            backdrop-filter: blur(2px);
-        }
-
-        .overlay.show {
-            display: flex;
-        }
-
-        .overlay .big-icon {
-            font-size: 52px;
-            font-weight: 300;
-            color: #0078d7;
-            margin-bottom: 16px;
-            letter-spacing: 2px;
-        }
-
-        .overlay .big-text {
-            font-size: 28px;
-            font-weight: 500;
-            color: #1a1a1a;
-            text-align: center;
-        }
-
-        .overlay .sub-text {
-            font-size: 16px;
-            color: #666;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        /* ===== 模态对话框（Windows 风格） ===== */
-        .modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.45);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 30;
-            padding: 30px;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal-box {
-            background: #ffffff;
-            border: 1px solid #b0b0b0;
-            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.25);
-            width: 440px;
-            max-width: 90vw;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            animation: modalFade 0.12s ease-out;
-        }
-
-        @keyframes modalFade {
-            from {
-                opacity: 0;
-                transform: scale(0.97);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .modal-header {
-            background: #f0f0f0;
-            padding: 10px 18px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #1a1a1a;
-            border-bottom: 1px solid #d0d0d0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .modal-header .modal-icon {
-            font-size: 18px;
-            font-weight: 400;
-        }
-
-        .modal-body {
-            padding: 22px 24px 18px 24px;
-            font-size: 15px;
-            color: #1a1a1a;
-            line-height: 1.6;
-            min-height: 70px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .modal-body .modal-desc {
-            color: #333;
-        }
-
-        .modal-body .modal-desc .highlight {
-            color: #0078d7;
-            font-weight: 500;
-        }
-
-        .modal-footer {
-            padding: 12px 24px 18px 24px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            border-top: 1px solid #eaeaea;
-        }
-
-        .modal-footer button {
-            padding: 6px 28px;
-            font-size: 14px;
-            font-family: inherit;
-            border: 1px solid #c0c0c0;
-            background: #f5f5f5;
-            color: #1a1a1a;
-            cursor: pointer;
-            transition: background 0.1s, border-color 0.1s;
-            border-radius: 0;
-            min-width: 76px;
-        }
-
-        .modal-footer button:hover {
-            background: #e8e8e8;
-        }
-
-        .modal-footer button.primary {
-            background: #0078d7;
-            border-color: #0078d7;
-            color: #ffffff;
-        }
-
-        .modal-footer button.primary:hover {
-            background: #005a9e;
-            border-color: #005a9e;
-        }
-
-        .modal-footer button.primary:active {
-            background: #00457a;
-        }
-
-        .modal-footer button.danger {
-            background: #e81123;
-            border-color: #e81123;
-            color: #ffffff;
-        }
-
-        .modal-footer button.danger:hover {
-            background: #c00a1a;
-        }
-
-        /* ===== 通知 toast ===== */
-        .toast {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a1a1a;
-            color: #f0f0f0;
-            padding: 10px 24px;
-            font-size: 14px;
-            border-radius: 0;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
-            display: none;
-            z-index: 40;
-            white-space: nowrap;
-            max-width: 90%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .toast.show {
-            display: block;
-            animation: toastIn 0.2s ease-out;
-        }
-
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        /* ===== 响应式 ===== */
-        @media (max-width: 600px) {
-            .content {
-                padding: 18px 16px 22px 16px;
-            }
-            #question-text {
-                font-size: 16px;
-            }
-            .options .opt-btn {
-                font-size: 14px;
-                padding: 7px 16px;
-                min-width: 60px;
-            }
-            .modal-box {
-                width: 92vw;
-            }
-            .modal-body {
-                padding: 16px 18px 14px 18px;
-                font-size: 14px;
-            }
-            .modal-footer {
-                padding: 10px 18px 14px 18px;
-            }
-            #result-text {
-                font-size: 20px;
-            }
-            #result-text .result-value {
-                font-size: 24px;
-            }
-            .title-bar .title {
-                font-size: 12px;
-            }
-            .window-controls span {
-                width: 36px;
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .options {
-                gap: 6px 8px;
-            }
-            .options .opt-btn {
-                font-size: 13px;
-                padding: 6px 12px;
-                min-width: 50px;
-            }
-            .content {
-                padding: 14px 10px 18px 10px;
-            }
-            #question-text {
-                font-size: 15px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI 测试（伪）</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  background: #1e1e1e;
+  color: #ccc;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hidden { display: none !important; }
+
+/* 主窗口 */
+#app {
+  width: 800px;
+  max-width: 96vw;
+  background: #ffffff;
+  color: #1a1a1a;
+  border: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+}
+#titlebar {
+  background: #0078d7;
+  color: #ffffff;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+#titlebar h1 { font-size: 1.2rem; font-weight: 600; }
+#titlebar span { font-size: 0.8rem; opacity: 0.9; }
+#content {
+  padding: 2rem 2rem 3rem;
+  min-height: 380px;
+}
+
+/* 问题区 */
+.question-index {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.8rem;
+  letter-spacing: 1px;
+}
+.question-text {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #111;
+}
+.options { display: flex; flex-wrap: wrap; gap: 12px; }
+.option-btn,
+.action-btn {
+  border: 1px solid #adadad;
+  background: #e1e1e1;
+  color: #000;
+  padding: 0.8rem 1.6rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.option-btn:hover,
+.action-btn:hover {
+  background: #e5f1fb;
+  border-color: #0078d7;
+}
+.primary {
+  background: #0078d7;
+  border-color: #0078d7;
+  color: #fff;
+}
+.primary:hover { background: #0067c0; border-color: #0067c0; }
+
+input[type="text"] {
+  border: 1px solid #adadad;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 460px;
+  color: #111;
+  background: #fff;
+}
+.input-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+/* 结果区 */
+.result-box { text-align: center; padding: 2rem 0; }
+.result-label { font-size: 1rem; color: #666; }
+.result-code {
+  font-size: 5rem;
+  font-weight: 600;
+  letter-spacing: 6px;
+  color: #0078d7;
+  margin: 1rem 0;
+}
+.share-btn { margin-top: 2rem; }
+
+/* 禁止访问 */
+#block-page {
+  position: fixed;
+  inset: 0;
+  background: #0078d7;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  text-align: center;
+  flex-direction: column;
+}
+#block-page .error-icon { font-size: 5rem; font-weight: 300; }
+#block-page h2 { font-size: 2rem; margin: 1rem 0; }
+#block-page p { font-size: 1.1rem; opacity: 0.95; margin: 0.3rem 0; }
+#block-page .error-code { font-size: 0.9rem; opacity: 0.8; margin-top: 1.5rem; }
+#block-page .action-btn {
+  background: #fff;
+  color: #0078d7;
+  border-color: #fff;
+  margin-top: 20px;
+}
+
+/* 模态框 */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.modal-box {
+  background: #fff;
+  color: #1a1a1a;
+  width: 420px;
+  max-width: 90vw;
+  border: 1px solid #333;
+}
+.modal-header {
+  background: #0078d7;
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  font-weight: 600;
+}
+.modal-body {
+  padding: 2rem 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+.modal-footer {
+  padding: 1rem;
+  background: #f0f0f0;
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.camera-permission {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.camera-permission .lock {
+  font-weight: 600;
+  background: #e1e1e1;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid #adadad;
+}
+</style>
 </head>
 <body>
+<div id="app">
+  <div id="titlebar">
+    <h1>MBTI 测试（伪）</h1>
+    <span>Windows 10 风格讽刺版</span>
+  </div>
+  <div id="content"></div>
+</div>
 
-    <div class="window" id="appWindow">
+<div id="block-page" class="hidden">
+  <div class="error-icon">:(</div>
+  <h2>您的访问已被禁止</h2>
+  <p>您未满 18 周岁，无权参与本测试。</p>
+  <p>请离开此页面。</p>
+  <div class="error-code">错误代码：AGE_18_ACCESS_DENIED</div>
+  <button class="action-btn" onclick="location.reload()">重新加载</button>
+</div>
 
-        <!-- ===== 标题栏 ===== -->
-        <div class="title-bar">
-            <div class="title">
-                <span class="icon">M</span>
-                SBTI 人格测试 · 
-            </div>
-            <div class="window-controls">
-                <span class="minimize">_</span>
-                <span class="maximize">☐</span>
-                <span class="close">✕</span>
-            </div>
-        </div>
-
-        <!-- ===== 内容 ===== -->
-        <div class="content" id="mainContent">
-
-            <!-- 进度 -->
-            <div class="progress-area" id="progressArea">
-                <span class="step-num" id="stepNum">1/16</span>
-                <span class="step-label" id="stepLabel">问题</span>
-                <div class="progress-bar-track">
-                    <div class="progress-bar-fill" id="progressFill"></div>
-                </div>
-            </div>
-
-            <!-- 问题区 -->
-            <div id="question-area">
-                <div id="question-text"></div>
-                <div id="optionsContainer"></div>
-            </div>
-
-            <!-- 结果区 -->
-            <div id="result-area">
-                <div id="result-text"></div>
-                <div class="result-actions">
-                    <button id="shareBtn">分享结果</button>
-                    <button id="restartBtn" class="secondary">重新测试</button>
-                </div>
-            </div>
-
-            <!-- 覆盖层：禁止访问 -->
-            <div class="overlay" id="blockOverlay">
-                <div class="big-icon">⛔</div>
-                <div class="big-text">访问被拒绝</div>
-                <div class="sub-text">劳布斯的还敢来测试😠</div>
-            </div>
-
-            <!-- Toast -->
-            <div class="toast" id="toast"></div>
-        </div>
-
-        <!-- ===== 模态对话框容器 ===== -->
-        <div class="modal-overlay" id="modalOverlay">
-            <div class="modal-box">
-                <div class="modal-header" id="modalHeader">
-                    <span class="modal-icon" id="modalIcon">⚠</span>
-                    <span id="modalTitle">提示</span>
-                </div>
-                <div class="modal-body" id="modalBody">
-                    <div class="modal-desc" id="modalDesc">内容</div>
-                </div>
-                <div class="modal-footer" id="modalFooter">
-                    <!-- 由 js 动态生成 -->
-                </div>
-            </div>
-        </div>
-
+<div id="modal-overlay" class="overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">提示</div>
+    <div class="modal-body" id="modal-message"></div>
+    <div class="modal-footer">
+      <button class="action-btn" id="modal-ok">确定</button>
     </div>
+  </div>
+</div>
 
-    <script>
-        (function() {
-            'use strict';
+<div id="camera-overlay" class="overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">权限请求</div>
+    <div class="modal-body">
+      <div class="camera-permission">
+        <div class="lock">锁</div>
+        <div>
+          <strong>mmmm.fake</strong> 想要使用您的摄像头。<br>
+          <span style="color:#666; font-size:0.9rem;">此权限请求为虚假弹窗，不会实际调用摄像头。</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="action-btn" id="camera-deny">拒绝</button>
+      <button class="action-btn primary" id="camera-allow">允许</button>
+    </div>
+  </div>
+</div>
 
-            // ============================================================
-            //  配置
-            // ============================================================
-            const SITE_URL = 'https://gumingdilian-hub.github.io/mmmm/';
+<script>
+const siteUrl = 'https://gumingdilian-hub.github.io/mmmm/';
 
-            const RESULTS = [
-                { id: 'cnmd', text: '我的人格是 cnmd，不服来挨骂！' },
-                { id: '67', text: '我是 67676767676767' },
-                { id: 'OMG', text: '我的人格是乌梅干！' },
-                { id: 'fake', text: '我的人格是法克！' },
-                { id: 'shit', text: '我的人格是粪便！是拉拉拉的哦' },
-                { id: 'byd', text: '我的人格是 beyond，黄家驹哭了' },
-                { id: 'wtf', text: '我的人格是 fake 升级版' },
-                { id: 'typec', text: '我的人格是 type c！我来插插你的' },
-                { id: 'notch', text: '我的人格是 no 吃，绝食抗议' },
-                { id: 'him', text: '我的人格是黑木大神，除非你是白木' },
-                { id: 'porn', text: '我的人格是 porn，给我爽爆了' },
-                { id: 'orz', text: '我的人格是 orz，天生的奴隶只会乱跪' }
-            ];
+const results = [
+  { code: 'CNMD', desc: '我的人格是 cnmd，不服来挨骂！' },
+  { code: '67', desc: '我是 67676767676767' },
+  { code: 'OMG', desc: '我的人格是乌梅干！' },
+  { code: 'FAKE', desc: '我的人格是法克！' },
+  { code: 'SHIT', desc: '我的人格是粪便！是拉拉拉的哦' },
+  { code: 'BYD', desc: '我的人格是 beyond，黄家驹哭了' },
+  { code: 'WTF', desc: '我的人格是 fake 升级版' },
+  { code: 'TYPEC', desc: '我的人格是 type c！我来插插你的' },
+  { code: 'NOTCH', desc: '我的人格是 no 吃，绝食抗议' },
+  { code: 'HIM', desc: '我的人格是黑木大神，除非你是白木' },
+  { code: 'PORN', desc: '我的人格是 porn，给我爽爆了' },
+  { code: 'ORZ', desc: '我的人格是 orz，天生的奴隶只会乱跪' }
+];
 
-            // ============================================================
-            //  问题定义
-            // ============================================================
-            const QUESTIONS = [{
-                id: 1,
-                text: '您满 18 周岁了吗',
-                type: 'choice',
-                options: [
-                    { label: 'A  yes', value: 'yes' },
-                    { label: 'B  no', value: 'no' }
-                ]
-            }, {
-                id: 2,
-                text: '您会爱上一只羊吗',
-                type: 'choice',
-                options: [
-                    { label: 'A  yes', value: 'yes' },
-                    { label: 'B  no', value: 'no' }
-                ]
-            }, {
-                id: 3,
-                text: '您会用舌头舔自己手肘吗',
-                type: 'choice',
-                options: [
-                    { label: 'A  yes', value: 'yes' },
-                    { label: 'B  no', value: 'no' }
-                ]
-            }, {
-                id: 4,
-                text: '您知道您为什么还活着吗',
-                type: 'choice',
-                options: [
-                    { label: 'A  知道', value: '知道' },
-                    { label: 'B  不知道', value: '不知道' }
-                ]
-            }, {
-                id: 5,
-                text: '您认为一头大象多重',
-                type: 'choice',
-                options: [
-                    { label: 'A  500kg', value: '500kg' },
-                    { label: 'B  1000kg', value: '1000kg' },
-                    { label: 'C  5000kg', value: '5000kg' },
-                    { label: 'D  不知道', value: '不知道' }
-                ]
-            }, {
-                id: 6,
-                text: '您在社交时倾向于热烈奔放还是 AD 钙奶',
-                type: 'choice',
-                options: [
-                    { label: 'A  热烈奔放', value: '热烈奔放' },
-                    { label: 'B  AD 钙奶', value: 'AD钙奶' }
-                ]
-            }, {
-                id: 7,
-                text: '您喜欢女孩还是男孩',
-                type: 'choice',
-                options: [
-                    { label: 'A  女孩', value: '女孩' },
-                    { label: 'B  男孩', value: '男孩' }
-                ]
-            }, {
-                id: 8,
-                text: '您喜欢可口可乐还是百事可乐',
-                type: 'choice',
-                options: [
-                    { label: 'A  可口可乐', value: '可口可乐' },
-                    { label: 'B  百事可乐', value: '百事可乐' }
-                ]
-            }, {
-                id: 9,
-                text: '您喜欢企鹅还是猫咪',
-                type: 'choice',
-                options: [
-                    { label: 'A  企鹅', value: '企鹅' },
-                    { label: 'B  猫咪', value: '猫咪' }
-                ]
-            }, {
-                id: 10,
-                text: '您会自我感动吗',
-                type: 'choice',
-                options: [
-                    { label: 'A  会', value: '会' },
-                    { label: 'B  不会', value: '不会' }
-                ]
-            }, {
-                id: 11,
-                text: '您会自我安慰吗',
-                type: 'choice',
-                options: [
-                    { label: 'A  会', value: '会' },
-                    { label: 'B  不会', value: '不会' }
-                ]
-            }, {
-                id: 12,
-                text: '您会自慰吗',
-                type: 'choice',
-                options: [
-                    { label: 'A  会', value: '会' },
-                    { label: 'B  不会', value: '不会' }
-                ]
-            }, {
-                id: 13,
-                text: '您是人吗',
-                type: 'choice',
-                options: [
-                    { label: 'A  是', value: '是' },
-                    { label: 'B  不是', value: '不是' }
-                ]
-            }, {
-                id: 14,
-                text: '请用一句话证明你是人类',
-                type: 'input',
-                placeholder: '请输入你的证明……'
-            }, {
-                id: 15,
-                text: '您的生理性别是',
-                type: 'choice',
-                options: [
-                    { label: 'A  boy', value: 'boy' },
-                    { label: 'B  girl', value: 'girl' }
-                ]
-            }, {
-                id: 16,
-                text: '您的病理性别是',
-                type: 'choice',
-                options: [
-                    { label: 'A  gay', value: 'gay' },
-                    { label: 'B  futa', value: 'futa' }
-                ]
-            }];
+const questions = [
+  { id: 1, text: '您满 18 周岁了吗？', type: 'choice', options: ['A: Yes', 'B: No'] },
+  { id: 2, text: '您会爱上一只羊吗？', type: 'choice', options: ['A: Yes', 'B: No'] },
+  { id: 3, text: '您会用舌头舔自己手肘吗？', type: 'choice', options: ['A: Yes', 'B: No'] },
+  { id: 4, text: '您知道您为什么还活着吗？', type: 'choice', options: ['A: 知道', 'B: 不知道'] },
+  { id: 5, text: '您认为一头大象多重？', type: 'choice', options: ['A: 比牛重', 'B: 大概三吨', 'C: 我不到啊'] },
+  { id: 6, text: '您在社交时倾向于热烈奔放还是 AD 钙奶？', type: 'choice', options: ['A: 热烈奔放', 'B: AD 钙奶'] },
+  { id: 7, text: '您喜欢女孩还是男孩？', type: 'choice', options: ['A: 女孩', 'B: 男孩'] },
+  { id: 8, text: '您喜欢可口可乐还是百事可乐？', type: 'choice', options: ['A: 可口可乐', 'B: 百事可乐'] },
+  { id: 9, text: '您喜欢企鹅还是猫咪？', type: 'choice', options: ['A: 企鹅', 'B: 猫咪'] },
+  { id: 10, text: '您会自我感动吗？', type: 'choice', options: ['A: Yes', 'B: No'] },
+  { id: 11, text: '您会自我安慰吗？', type: 'choice', options: ['A: Yes', 'B: No'] },
+  { id: 12, text: '您会自慰吗？', type: 'choice', options: ['A: Yes', 'B: No'] },
+  { id: 13, text: '您是人吗？', type: 'choice', options: ['A: 是', 'B: 否'] },
+  { id: 14, text: '请用一句话证明你是人类', type: 'input', placeholder: '输入任意内容' },
+  { id: 15, text: '您的生理性别是？', type: 'choice', options: ['A: boy', 'B: girl'] },
+  { id: 16, text: '您的病理性别是？', type: 'choice', options: ['A: gay', 'B: futa'] },
+  { id: 17, text: '咩咩咩？', type: 'choice', options: ['咩咩咩', '咩咩咩咩'] },
+  { id: 18, text: '咩咩咩咩？', type: 'choice', options: ['咩咩咩', '咩咩咩咩'] },
+  { id: 19, text: '咩咩咩咩咩？', type: 'choice', options: ['咩咩咩', '咩咩咩咩'] },
+  { id: 20, text: '咩咩咩咩咩咩？', type: 'choice', options: ['咩咩咩', '咩咩咩咩'] }
+];
 
-            const TOTAL_QS = QUESTIONS.length;
+let currentIndex = 0;
+let currentResult = null;
+let nextCallback = null;
 
-            // ============================================================
-            //  状态
-            // ============================================================
-            let currentIndex = 0; // 0-based
-            let answers = {}; // { questionId: value }
-            let isBlocked = false; // 问题1选yes
-            let isSheepMode = false; // 问题2选yes → 跳结果
-            let sheepResult = false; // 是否显示咩咩咩
-            let cameraPending = false; // 摄像头弹窗是否待处理
-            let finalResult = ''; // 最终结果文本
+const contentEl = document.getElementById('content');
+const blockPage = document.getElementById('block-page');
+const modalOverlay = document.getElementById('modal-overlay');
+const modalMessage = document.getElementById('modal-message');
+const cameraOverlay = document.getElementById('camera-overlay');
+const modalOk = document.getElementById('modal-ok');
+const cameraAllow = document.getElementById('camera-allow');
+const cameraDeny = document.getElementById('camera-deny');
 
-            // ============================================================
-            //  DOM 引用
-            // ============================================================
-            const questionArea = document.getElementById('question-area');
-            const resultArea = document.getElementById('result-area');
-            const questionText = document.getElementById('question-text');
-            const optionsContainer = document.getElementById('optionsContainer');
-            const stepNum = document.getElementById('stepNum');
-            const stepLabel = document.getElementById('stepLabel');
-            const progressFill = document.getElementById('progressFill');
-            const resultText = document.getElementById('result-text');
-            const shareBtn = document.getElementById('shareBtn');
-            const restartBtn = document.getElementById('restartBtn');
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalHeader = document.getElementById('modalHeader');
-            const modalIcon = document.getElementById('modalIcon');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalDesc = document.getElementById('modalDesc');
-            const modalFooter = document.getElementById('modalFooter');
-            const blockOverlay = document.getElementById('blockOverlay');
-            const toast = document.getElementById('toast');
-            const progressArea = document.getElementById('progressArea');
+function showQuestion(index) {
+  const q = questions[index];
+  if (!q) { showResult(); return; }
+  contentEl.innerHTML = '';
 
-            let toastTimer = null;
+  const idxEl = document.createElement('div');
+  idxEl.className = 'question-index';
+  idxEl.textContent = `问题 ${q.id} / ${questions.length}`;
+  contentEl.appendChild(idxEl);
 
-            // ============================================================
-            //  工具
-            // ============================================================
-            function shuffleArray(arr) {
-                for (let i = arr.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                }
-                return arr;
-            }
+  const textEl = document.createElement('div');
+  textEl.className = 'question-text';
+  textEl.textContent = q.text;
+  contentEl.appendChild(textEl);
 
-            function pickRandom(arr) {
-                return arr[Math.floor(Math.random() * arr.length)];
-            }
+  if (q.type === 'input') {
+    const inputRow = document.createElement('div');
+    inputRow.className = 'input-row';
 
-            function getResultText() {
-                if (sheepResult) return '咩咩咩';
-                const chosen = pickRandom(RESULTS);
-                return chosen.text;
-            }
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = q.placeholder || '';
+    input.id = 'answer-input';
 
-            function getShareText() {
-                const r = sheepResult ? '咩咩咩' : finalResult;
-                return r + ' ' + SITE_URL;
-            }
+    const btn = document.createElement('button');
+    btn.className = 'action-btn primary';
+    btn.textContent = '提交';
+    btn.addEventListener('click', () => {
+      if (input.value.trim() === '') {
+        showModal('请输入内容');
+        return;
+      }
+      nextQuestion();
+    });
 
-            // ============================================================
-            //  Toast
-            // ============================================================
-            function showToast(msg, duration) {
-                duration = duration || 2200;
-                toast.textContent = msg;
-                toast.classList.add('show');
-                clearTimeout(toastTimer);
-                toastTimer = setTimeout(function() {
-                    toast.classList.remove('show');
-                }, duration);
-            }
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        btn.click();
+      }
+    });
 
-            // ============================================================
-            //  模态对话框
-            // ============================================================
-            function showModal(icon, title, desc, buttons) {
-                return new Promise(function(resolve) {
-                    modalIcon.textContent = icon || '⚠';
-                    modalTitle.textContent = title || '提示';
-                    modalDesc.innerHTML = desc || '';
-                    modalFooter.innerHTML = '';
-                    buttons.forEach(function(b) {
-                        const btn = document.createElement('button');
-                        btn.textContent = b.label;
-                        if (b.primary) btn.classList.add('primary');
-                        if (b.danger) btn.classList.add('danger');
-                        btn.addEventListener('click', function() {
-                            modalOverlay.classList.remove('show');
-                            resolve(b.value);
-                        });
-                        modalFooter.appendChild(btn);
-                    });
-                    modalOverlay.classList.add('show');
-                });
-            }
+    inputRow.appendChild(input);
+    inputRow.appendChild(btn);
+    contentEl.appendChild(inputRow);
+    return;
+  }
 
-            function showSimpleModal(icon, title, desc) {
-                return showModal(icon, title, desc, [
-                    { label: '确定', value: 'ok', primary: true }
-                ]);
-            }
+  const optionsContainer = document.createElement('div');
+  optionsContainer.className = 'options';
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => handleChoice(idx));
+    optionsContainer.appendChild(btn);
+  });
+  contentEl.appendChild(optionsContainer);
+}
 
-            // ============================================================
-            //  渲染问题
-            // ============================================================
-            function renderQuestion(index) {
-                // 清除之前的选择状态
-                const q = QUESTIONS[index];
-                if (!q) return;
+function handleChoice(optionIndex) {
+  // 第1题 yes -> 禁止访问
+  if (currentIndex === 0 && optionIndex === 0) {
+    showBlocked();
+    return;
+  }
 
-                // 更新进度
-                const displayNum = index + 1;
-                stepNum.textContent = displayNum + '/' + TOTAL_QS;
-                stepLabel.textContent = '问题';
-                const pct = ((index) / TOTAL_QS) * 100;
-                progressFill.style.width = pct + '%';
+  // 第2题 yes -> 跳到第17题咩咩段
+  if (currentIndex === 1 && optionIndex === 0) {
+    currentIndex = 16;
+    showQuestion(currentIndex);
+    return;
+  }
 
-                // 显示问题区，隐藏结果区
-                questionArea.style.display = 'flex';
-                resultArea.classList.remove('show');
+  // 第3题 yes -> 虚假摄像头权限
+  if (currentIndex === 2 && optionIndex === 0) {
+    showCameraModal(() => nextQuestion());
+    return;
+  }
 
-                // 问题文本
-                let qText = '<span class="q-number">' + displayNum + '.</span> ' + q.text;
-                questionText.innerHTML = qText;
+  // 第7题女孩/男孩
+  if (currentIndex === 6) {
+    if (optionIndex === 0) {
+      showModal('！？lala？！', () => nextQuestion());
+    } else {
+      showModal('思想不要太封建，生男生女都一样', () => nextQuestion());
+    }
+    return;
+  }
 
-                // 清空选项
-                optionsContainer.innerHTML = '';
+  nextQuestion();
+}
 
-                if (q.type === 'choice') {
-                    const optDiv = document.createElement('div');
-                    optDiv.className = 'options';
-                    q.options.forEach(function(opt) {
-                        const btn = document.createElement('button');
-                        btn.className = 'opt-btn';
-                        btn.textContent = opt.label;
-                        btn.dataset.value = opt.value;
-                        btn.addEventListener('click', function() {
-                            // 移除其他选中样式
-                            optDiv.querySelectorAll('.opt-btn').forEach(b => b.classList.remove(
-                            'selected'));
-                            btn.classList.add('selected');
-                            // 处理选择
-                            handleChoice(q.id, opt.value);
-                        });
-                        optDiv.appendChild(btn);
-                    });
-                    optionsContainer.appendChild(optDiv);
-                } else if (q.type === 'input') {
-                    const group = document.createElement('div');
-                    group.className = 'input-group';
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.placeholder = q.placeholder || '请输入…';
-                    input.id = 'inputField';
-                    const confirmBtn = document.createElement('button');
-                    confirmBtn.className = 'confirm-btn';
-                    confirmBtn.textContent = '确认';
-                    confirmBtn.addEventListener('click', function() {
-                        const val = input.value.trim();
-                        if (val === '') {
-                            showToast('请输入内容再确认', 1500);
-                            return;
-                        }
-                        handleInput(q.id, val);
-                    });
-                    input.addEventListener('keydown', function(e) {
-                        if (e.key === 'Enter') {
-                            confirmBtn.click();
-                        }
-                    });
-                    group.appendChild(input);
-                    group.appendChild(confirmBtn);
-                    optionsContainer.appendChild(group);
-                    // 自动聚焦
-                    setTimeout(function() { input.focus(); }, 80);
-                }
-            }
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= questions.length) {
+    showResult();
+  } else {
+    showQuestion(currentIndex);
+  }
+}
 
-            // ============================================================
-            //  处理选择 / 输入
-            // ============================================================
-            function handleChoice(qId, value) {
-                answers[qId] = value;
+function showBlocked() {
+  document.getElementById('app').classList.add('hidden');
+  blockPage.classList.remove('hidden');
+}
 
-                // ----- 特殊逻辑 -----
-                // 问题1: 满18岁
-                if (qId === 1) {
-                    if (value === 'yes') {
-                        // 禁止访问
-                        isBlocked = true;
-                        blockOverlay.classList.add('show');
-                        return;
-                    } else {
-                        // no → 继续
-                        goToNext();
-                        return;
-                    }
-                }
+function showModal(message, callback) {
+  modalMessage.textContent = message;
+  nextCallback = callback || null;
+  modalOverlay.classList.remove('hidden');
+}
 
-                // 问题2: 爱上一只羊
-                if (qId === 2) {
-                    if (value === 'yes') {
-                        // 跳转到结果，显示咩咩咩
-                        sheepResult = true;
-                        isSheepMode = true;
-                        showResult();
-                        return;
-                    } else {
-                        // no → 继续
-                        goToNext();
-                        return;
-                    }
-                }
+modalOk.addEventListener('click', () => {
+  modalOverlay.classList.add('hidden');
+  const cb = nextCallback;
+  nextCallback = null;
+  if (cb) cb();
+});
 
-                // 问题3: 舔手肘
-                if (qId === 3) {
-                    if (value === 'yes') {
-                        // 弹出摄像头权限弹窗
-                        showCameraModal().then(function() {
-                            // 弹窗关闭后继续
-                            goToNext();
-                        });
-                        return;
-                    } else {
-                        goToNext();
-                        return;
-                    }
-                }
+function showCameraModal(callback) {
+  nextCallback = callback || null;
+  cameraOverlay.classList.remove('hidden');
+}
 
-                // 问题7: 喜欢女孩还是男孩
-                if (qId === 7) {
-                    if (value === '女孩') {
-                        showSimpleModal('!', 'lala', '！？lala？！').then(function() {
-                            goToNext();
-                        });
-                        return;
-                    } else if (value === '男孩') {
-                        showSimpleModal('!', '提示', '思想不要太封建，生男生女都一样').then(function() {
-                            goToNext();
-                        });
-                        return;
-                    }
-                }
+cameraAllow.addEventListener('click', () => {
+  cameraOverlay.classList.add('hidden');
+  const cb = nextCallback;
+  nextCallback = null;
+  if (cb) cb();
+});
 
-                // 其他普通选择 → 继续
-                goToNext();
-            }
+cameraDeny.addEventListener('click', () => {
+  cameraOverlay.classList.add('hidden');
+  const cb = nextCallback;
+  nextCallback = null;
+  if (cb) cb();
+});
 
-            function handleInput(qId, value) {
-                answers[qId] = value;
-                // 问题14 → 继续
-                goToNext();
-            }
+function showResult() {
+  currentResult = results[Math.floor(Math.random() * results.length)];
+  contentEl.innerHTML = '';
 
-            // ============================================================
-            //  摄像头权限弹窗（虚假）
-            // ============================================================
-            function showCameraModal() {
-                return new Promise(function(resolve) {
-                    const icon = '📷';
-                    const title = '摄像头权限请求';
-                    const desc = '是否允许此应用访问您的摄像头？<br><span style="color:#666;font-size:14px;">111111</span>';
-                    showModal(icon, title, desc, [
-                        { label: '允许', value: 'allow', primary: true },
-                        { label: '拒绝', value: 'deny' }
-                    ]).then(function(result) {
-                        if (result === 'allow') {
-                            showToast('已允许摄像头访问', 1500);
-                        } else {
-                            showToast('已拒绝摄像头访问', 1200);
-                        }
-                        resolve();
-                    });
-                });
-            }
+  const box = document.createElement('div');
+  box.className = 'result-box';
 
-            // ============================================================
-            //  跳转
-            // ============================================================
-            function goToNext() {
-                if (isBlocked) return;
-                if (isSheepMode) return;
-                const next = currentIndex + 1;
-                if (next >= TOTAL_QS) {
-                    // 所有问题完成 → 显示结果
-                    showResult();
-                } else {
-                    currentIndex = next;
-                    renderQuestion(currentIndex);
-                }
-            }
+  const label = document.createElement('div');
+  label.className = 'result-label';
+  label.textContent = '您的测试结果：';
 
-            // ============================================================
-            //  显示结果
-            // ============================================================
-            function showResult() {
-                questionArea.style.display = 'none';
-                resultArea.classList.add('show');
-                progressFill.style.width = '100%';
-                stepNum.textContent = '完成';
-                stepLabel.textContent = '结果';
+  const code = document.createElement('div');
+  code.className = 'result-code';
+  code.textContent = currentResult.code;
 
-                let resultValue = '';
-                if (sheepResult) {
-                    resultValue = '咩咩咩';
-                } else {
-                    finalResult = getResultText();
-                    resultValue = finalResult;
-                }
+  const shareBtn = document.createElement('button');
+  shareBtn.className = 'action-btn primary share-btn';
+  shareBtn.textContent = '分享结果';
+  shareBtn.addEventListener('click', shareResult);
 
-                // 如果还没有finalResult，设置
-                if (!finalResult && !sheepResult) {
-                    finalResult = resultValue;
-                }
+  box.appendChild(label);
+  box.appendChild(code);
+  box.appendChild(shareBtn);
+  contentEl.appendChild(box);
+}
 
-                resultText.innerHTML = '<span class="result-label">你的 SBTI 人格是</span><span class="result-value">' +
-                    resultValue + '</span>';
-            }
+function shareResult() {
+  if (!currentResult) return;
+  const shareText = `我的MBTI测试结果：${currentResult.code} - ${currentResult.desc} ${siteUrl}`;
 
-            // ============================================================
-            //  重新开始
-            // ============================================================
-            function resetTest() {
-                // 重置状态
-                currentIndex = 0;
-                answers = {};
-                isBlocked = false;
-                isSheepMode = false;
-                sheepResult = false;
-                finalResult = '';
-                blockOverlay.classList.remove('show');
-                modalOverlay.classList.remove('show');
-                toast.classList.remove('show');
-                clearTimeout(toastTimer);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareText).then(() => {
+      showModal('已复制到剪贴板');
+    }).catch(() => {
+      fallbackCopy(shareText);
+    });
+  } else {
+    fallbackCopy(shareText);
+  }
+}
 
-                // 隐藏结果，显示问题
-                resultArea.classList.remove('show');
-                questionArea.style.display = 'flex';
-                renderQuestion(0);
-            }
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showModal('已复制到剪贴板');
+  } catch (e) {
+    showModal('复制失败，请手动复制：\n' + text);
+  }
+  document.body.removeChild(ta);
+}
 
-            // ============================================================
-            //  分享
-            // ============================================================
-            function handleShare() {
-                const shareText = getShareText();
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(shareText).then(function() {
-                        showToast('已复制结果与链接！', 1800);
-                    }).catch(function() {
-                        fallbackCopy(shareText);
-                    });
-                } else {
-                    fallbackCopy(shareText);
-                }
-            }
-
-            function fallbackCopy(text) {
-                const ta = document.createElement('textarea');
-                ta.value = text;
-                ta.style.position = 'fixed';
-                ta.style.opacity = '0';
-                ta.style.left = '-9999px';
-                document.body.appendChild(ta);
-                ta.select();
-                try {
-                    document.execCommand('copy');
-                    showToast('已复制结果与链接！', 1800);
-                } catch (e) {
-                    showToast('复制失败，请手动复制：' + text, 3000);
-                }
-                document.body.removeChild(ta);
-            }
-
-            // ============================================================
-            //  初始化
-            // ============================================================
-            function init() {
-                renderQuestion(0);
-
-                shareBtn.addEventListener('click', handleShare);
-                restartBtn.addEventListener('click', resetTest);
-
-                // 标题栏按钮（装饰）
-                document.querySelector('.window-controls .close').addEventListener('click', function() {
-                    if (confirm('确定要关闭吗？')) {
-                        document.getElementById('appWindow').style.opacity = '0.3';
-                        document.getElementById('appWindow').style.pointerEvents = 'none';
-                        showToast('窗口已冻结', 2000);
-                    }
-                });
-                document.querySelector('.window-controls .minimize').addEventListener('click', function() {
-                    document.getElementById('appWindow').style.transform = 'scale(0.95)';
-                    document.getElementById('appWindow').style.opacity = '0.5';
-                    setTimeout(function() {
-                        document.getElementById('appWindow').style.transform = 'scale(1)';
-                        document.getElementById('appWindow').style.opacity = '1';
-                    }, 400);
-                    showToast('逼真的最小化动画', 1000);
-                });
-                document.querySelector('.window-controls .maximize').addEventListener('click', function() {
-                    const w = document.getElementById('appWindow');
-                    if (w.style.width === '98vw') {
-                        w.style.width = '680px';
-                        w.style.maxWidth = '94vw';
-                        showToast('还原窗口', 800);
-                    } else {
-                        w.style.width = '98vw';
-                        w.style.maxWidth = '98vw';
-                        showToast('逼真的最大化动画', 800);
-                    }
-                });
-            }
-
-            // 页面加载完成后初始化
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-
-        })();
-    </script>
-
+// 初始化
+showQuestion(0);
+</script>
 </body>
 </html>
