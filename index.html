@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MBTI 人格测试 · Windows 10</title>
+    <style>
+        /* ===== 全局重置 & 字体 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: #e6e9ed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* ===== Windows 10 窗口 ===== */
+        .window {
+            width: 680px;
+            max-width: 94vw;
+            min-height: 420px;
+            background: #ffffff;
+            border: 1px solid #b0b0b0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: min-height 0.2s;
+        }
+
+        /* ===== 标题栏 ===== */
+        .title-bar {
+            background: #0078d7;
+            height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6px 0 14px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .title-bar .title {
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .title-bar .title .icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border-radius: 2px;
+            font-size: 10px;
+            line-height: 16px;
+            text-align: center;
+            color: #0078d7;
+            font-weight: 700;
+        }
+
+        .window-controls {
+            display: flex;
+            height: 100%;
+            align-items: center;
+        }
+
+        .window-controls span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 100%;
+            color: #ffffff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.1s;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+        }
+
+        .window-controls span:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .window-controls .close:hover {
+            background: #e81123;
+        }
+
+        /* ===== 内容区域 ===== */
+        .content {
+            padding: 26px 32px 30px 32px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 280px;
+            position: relative;
+        }
+
+        /* ===== 进度条 ===== */
+        .progress-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+            font-size: 13px;
+            color: #444;
+            border-bottom: 1px solid #eaeaea;
+            padding-bottom: 12px;
+        }
+
+        .progress-area .step-num {
+            background: #0078d7;
+            color: #fff;
+            padding: 0 10px;
+            border-radius: 0;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 24px;
+            letter-spacing: 0.3px;
+        }
+
+        .progress-area .step-label {
+            color: #333;
+            font-weight: 400;
+        }
+
+        .progress-bar-track {
+            flex: 1;
+            height: 4px;
+            background: #d0d0d0;
+            margin-left: 6px;
+            border-radius: 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: #0078d7;
+            width: 0%;
+            transition: width 0.25s ease;
+            border-radius: 0;
+        }
+
+        /* ===== 问题区 ===== */
+        #question-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        #question-text {
+            font-size: 18px;
+            font-weight: 400;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 28px;
+            padding: 4px 0;
+            min-height: 60px;
+        }
+
+        #question-text .q-number {
+            color: #0078d7;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 14px;
+            margin-top: 4px;
+        }
+
+        .options .opt-btn {
+            background: #f5f5f5;
+            border: 1px solid #d0d0d0;
+            padding: 8px 22px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: background 0.12s, border-color 0.12s;
+            border-radius: 0;
+            min-width: 80px;
+            text-align: left;
+        }
+
+        .options .opt-btn:hover {
+            background: #e8e8e8;
+            border-color: #b0b0b0;
+        }
+
+        .options .opt-btn:active {
+            background: #d0d0d0;
+        }
+
+        .options .opt-btn.selected {
+            background: #0078d7;
+            border-color: #0078d7;
+            color: #ffffff;
+        }
+
+        /* ===== 输入框问题 ===== */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 6px;
+        }
+
+        .input-group input[type="text"] {
+            padding: 10px 14px;
+            font-size: 15px;
+            font-family: inherit;
+            border: 1px solid #c0c0c0;
+            border-radius: 0;
+            outline: none;
+            transition: border-color 0.15s;
+            background: #fafafa;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .input-group input[type="text"]:focus {
+            border-color: #0078d7;
+            background: #ffffff;
+        }
+
+        .input-group .confirm-btn {
+            background: #0078d7;
+            border: none;
+            color: #ffffff;
+            padding: 8px 28px;
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.12s;
+            border-radius: 0;
+            align-self: flex-start;
+        }
+
+        .input-group .confirm-btn:hover {
+            background: #005a9e;
+        }
+
+        .input-group .confirm-btn:active {
+            background: #00457a;
+        }
+
+        /* ===== 结果区 ===== */
+        #result-area {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        #result-area.show {
+            display: flex;
+        }
+
+        #result-text {
+            font-size: 26px;
+            font-weight: 500;
+            color: #1a1a1a;
+            line-height: 1.5;
+            margin-bottom: 28px;
+            word-break: break-word;
+            padding: 0 10px;
+        }
+
+        #result-text .result-label {
+            font-size: 18px;
+            font-weight: 400;
+            color: #555;
+        }
+
+        #result-text .result-value {
+            font-weight: 600;
+            color: #0078d7;
+            display: block;
+            margin-top: 10px;
+            font-size: 30px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 6px;
+        }
+
+        .result-actions button {
+            background: #0078d7;
+            border: none;
+            color: #ffffff;
+            padding: 8px 30px;
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.12s;
+            border-radius: 0;
+        }
+
+        .result-actions button:hover {
+            background: #005a9e;
+        }
+
+        .result-actions button:active {
+            background: #00457a;
+        }
+
+        .result-actions button.secondary {
+            background: #e6e6e6;
+            color: #1a1a1a;
+            border: 1px solid #c0c0c0;
+        }
+
+        .result-actions button.secondary:hover {
+            background: #d5d5d5;
+        }
+
+        /* ===== 覆盖层（禁止访问 / 咩咩咩覆盖） ===== */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 20;
+            padding: 30px;
+            backdrop-filter: blur(2px);
+        }
+
+        .overlay.show {
+            display: flex;
+        }
+
+        .overlay .big-icon {
+            font-size: 52px;
+            font-weight: 300;
+            color: #0078d7;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+
+        .overlay .big-text {
+            font-size: 28px;
+            font-weight: 500;
+            color: #1a1a1a;
+            text-align: center;
+        }
+
+        .overlay .sub-text {
+            font-size: 16px;
+            color: #666;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* ===== 模态对话框（Windows 风格） ===== */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            padding: 30px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #ffffff;
+            border: 1px solid #b0b0b0;
+            box-shadow: 0 6px 28px rgba(0, 0, 0, 0.25);
+            width: 440px;
+            max-width: 90vw;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            animation: modalFade 0.12s ease-out;
+        }
+
+        @keyframes modalFade {
+            from {
+                opacity: 0;
+                transform: scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            background: #f0f0f0;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a1a;
+            border-bottom: 1px solid #d0d0d0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header .modal-icon {
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .modal-body {
+            padding: 22px 24px 18px 24px;
+            font-size: 15px;
+            color: #1a1a1a;
+            line-height: 1.6;
+            min-height: 70px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .modal-body .modal-desc {
+            color: #333;
+        }
+
+        .modal-body .modal-desc .highlight {
+            color: #0078d7;
+            font-weight: 500;
+        }
+
+        .modal-footer {
+            padding: 12px 24px 18px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        .modal-footer button {
+            padding: 6px 28px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid #c0c0c0;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: background 0.1s, border-color 0.1s;
+            border-radius: 0;
+            min-width: 76px;
+        }
+
+        .modal-footer button:hover {
+            background: #e8e8e8;
+        }
+
+        .modal-footer button.primary {
+            background: #0078d7;
+            border-color: #0078d7;
+            color: #ffffff;
+        }
+
+        .modal-footer button.primary:hover {
+            background: #005a9e;
+            border-color: #005a9e;
+        }
+
+        .modal-footer button.primary:active {
+            background: #00457a;
+        }
+
+        .modal-footer button.danger {
+            background: #e81123;
+            border-color: #e81123;
+            color: #ffffff;
+        }
+
+        .modal-footer button.danger:hover {
+            background: #c00a1a;
+        }
+
+        /* ===== 通知 toast ===== */
+        .toast {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: #f0f0f0;
+            padding: 10px 24px;
+            font-size: 14px;
+            border-radius: 0;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+            display: none;
+            z-index: 40;
+            white-space: nowrap;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .toast.show {
+            display: block;
+            animation: toastIn 0.2s ease-out;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 600px) {
+            .content {
+                padding: 18px 16px 22px 16px;
+            }
+            #question-text {
+                font-size: 16px;
+            }
+            .options .opt-btn {
+                font-size: 14px;
+                padding: 7px 16px;
+                min-width: 60px;
+            }
+            .modal-box {
+                width: 92vw;
+            }
+            .modal-body {
+                padding: 16px 18px 14px 18px;
+                font-size: 14px;
+            }
+            .modal-footer {
+                padding: 10px 18px 14px 18px;
+            }
+            #result-text {
+                font-size: 20px;
+            }
+            #result-text .result-value {
+                font-size: 24px;
+            }
+            .title-bar .title {
+                font-size: 12px;
+            }
+            .window-controls span {
+                width: 36px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .options {
+                gap: 6px 8px;
+            }
+            .options .opt-btn {
+                font-size: 13px;
+                padding: 6px 12px;
+                min-width: 50px;
+            }
+            .content {
+                padding: 14px 10px 18px 10px;
+            }
+            #question-text {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="window" id="appWindow">
+
+        <!-- ===== 标题栏 ===== -->
+        <div class="title-bar">
+            <div class="title">
+                <span class="icon">M</span>
+                MBTI 人格测试 · 伪科学粉碎机
+            </div>
+            <div class="window-controls">
+                <span class="minimize">_</span>
+                <span class="maximize">☐</span>
+                <span class="close">✕</span>
+            </div>
+        </div>
+
+        <!-- ===== 内容 ===== -->
+        <div class="content" id="mainContent">
+
+            <!-- 进度 -->
+            <div class="progress-area" id="progressArea">
+                <span class="step-num" id="stepNum">1/16</span>
+                <span class="step-label" id="stepLabel">问题</span>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- 问题区 -->
+            <div id="question-area">
+                <div id="question-text"></div>
+                <div id="optionsContainer"></div>
+            </div>
+
+            <!-- 结果区 -->
+            <div id="result-area">
+                <div id="result-text"></div>
+                <div class="result-actions">
+                    <button id="shareBtn">分享结果</button>
+                    <button id="restartBtn" class="secondary">重新测试</button>
+                </div>
+            </div>
+
+            <!-- 覆盖层：禁止访问 -->
+            <div class="overlay" id="blockOverlay">
+                <div class="big-icon">⛔</div>
+                <div class="big-text">访问被拒绝</div>
+                <div class="sub-text">您未满 18 周岁，无法参与此测试。</div>
+            </div>
+
+            <!-- Toast -->
+            <div class="toast" id="toast"></div>
+        </div>
+
+        <!-- ===== 模态对话框容器 ===== -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-box">
+                <div class="modal-header" id="modalHeader">
+                    <span class="modal-icon" id="modalIcon">⚠</span>
+                    <span id="modalTitle">提示</span>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <div class="modal-desc" id="modalDesc">内容</div>
+                </div>
+                <div class="modal-footer" id="modalFooter">
+                    <!-- 由 js 动态生成 -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            //  配置
+            // ============================================================
+            const SITE_URL = 'https://gumingdilian-hub.github.io/mmmm/';
+
+            const RESULTS = [
+                { id: 'cnmd', text: '我的人格是 cnmd，不服来挨骂！' },
+                { id: '67', text: '我是 67676767676767' },
+                { id: 'OMG', text: '我的人格是乌梅干！' },
+                { id: 'fake', text: '我的人格是法克！' },
+                { id: 'shit', text: '我的人格是粪便！是拉拉拉的哦' },
+                { id: 'byd', text: '我的人格是 beyond，黄家驹哭了' },
+                { id: 'wtf', text: '我的人格是 fake 升级版' },
+                { id: 'typec', text: '我的人格是 type c！我来插插你的' },
+                { id: 'notch', text: '我的人格是 no 吃，绝食抗议' },
+                { id: 'him', text: '我的人格是黑木大神，除非你是白木' },
+                { id: 'porn', text: '我的人格是 porn，给我爽爆了' },
+                { id: 'orz', text: '我的人格是 orz，天生的奴隶只会乱跪' }
+            ];
+
+            // ============================================================
+            //  问题定义
+            // ============================================================
+            const QUESTIONS = [{
+                id: 1,
+                text: '您满 18 周岁了吗',
+                type: 'choice',
+                options: [
+                    { label: 'A  yes', value: 'yes' },
+                    { label: 'B  no', value: 'no' }
+                ]
+            }, {
+                id: 2,
+                text: '您会爱上一只羊吗',
+                type: 'choice',
+                options: [
+                    { label: 'A  yes', value: 'yes' },
+                    { label: 'B  no', value: 'no' }
+                ]
+            }, {
+                id: 3,
+                text: '您会用舌头舔自己手肘吗',
+                type: 'choice',
+                options: [
+                    { label: 'A  yes', value: 'yes' },
+                    { label: 'B  no', value: 'no' }
+                ]
+            }, {
+                id: 4,
+                text: '您知道您为什么还活着吗',
+                type: 'choice',
+                options: [
+                    { label: 'A  知道', value: '知道' },
+                    { label: 'B  不知道', value: '不知道' }
+                ]
+            }, {
+                id: 5,
+                text: '您认为一头大象多重',
+                type: 'choice',
+                options: [
+                    { label: 'A  500kg', value: '500kg' },
+                    { label: 'B  1000kg', value: '1000kg' },
+                    { label: 'C  5000kg', value: '5000kg' },
+                    { label: 'D  不知道', value: '不知道' }
+                ]
+            }, {
+                id: 6,
+                text: '您在社交时倾向于热烈奔放还是 AD 钙奶',
+                type: 'choice',
+                options: [
+                    { label: 'A  热烈奔放', value: '热烈奔放' },
+                    { label: 'B  AD 钙奶', value: 'AD钙奶' }
+                ]
+            }, {
+                id: 7,
+                text: '您喜欢女孩还是男孩',
+                type: 'choice',
+                options: [
+                    { label: 'A  女孩', value: '女孩' },
+                    { label: 'B  男孩', value: '男孩' }
+                ]
+            }, {
+                id: 8,
+                text: '您喜欢可口可乐还是百事可乐',
+                type: 'choice',
+                options: [
+                    { label: 'A  可口可乐', value: '可口可乐' },
+                    { label: 'B  百事可乐', value: '百事可乐' }
+                ]
+            }, {
+                id: 9,
+                text: '您喜欢企鹅还是猫咪',
+                type: 'choice',
+                options: [
+                    { label: 'A  企鹅', value: '企鹅' },
+                    { label: 'B  猫咪', value: '猫咪' }
+                ]
+            }, {
+                id: 10,
+                text: '您会自我感动吗',
+                type: 'choice',
+                options: [
+                    { label: 'A  会', value: '会' },
+                    { label: 'B  不会', value: '不会' }
+                ]
+            }, {
+                id: 11,
+                text: '您会自我安慰吗',
+                type: 'choice',
+                options: [
+                    { label: 'A  会', value: '会' },
+                    { label: 'B  不会', value: '不会' }
+                ]
+            }, {
+                id: 12,
+                text: '您会自慰吗',
+                type: 'choice',
+                options: [
+                    { label: 'A  会', value: '会' },
+                    { label: 'B  不会', value: '不会' }
+                ]
+            }, {
+                id: 13,
+                text: '您是人吗',
+                type: 'choice',
+                options: [
+                    { label: 'A  是', value: '是' },
+                    { label: 'B  不是', value: '不是' }
+                ]
+            }, {
+                id: 14,
+                text: '请用一句话证明你是人类',
+                type: 'input',
+                placeholder: '请输入你的证明……'
+            }, {
+                id: 15,
+                text: '您的生理性别是',
+                type: 'choice',
+                options: [
+                    { label: 'A  boy', value: 'boy' },
+                    { label: 'B  girl', value: 'girl' }
+                ]
+            }, {
+                id: 16,
+                text: '您的病理性别是',
+                type: 'choice',
+                options: [
+                    { label: 'A  gay', value: 'gay' },
+                    { label: 'B  futa', value: 'futa' }
+                ]
+            }];
+
+            const TOTAL_QS = QUESTIONS.length;
+
+            // ============================================================
+            //  状态
+            // ============================================================
+            let currentIndex = 0; // 0-based
+            let answers = {}; // { questionId: value }
+            let isBlocked = false; // 问题1选yes
+            let isSheepMode = false; // 问题2选yes → 跳结果
+            let sheepResult = false; // 是否显示咩咩咩
+            let cameraPending = false; // 摄像头弹窗是否待处理
+            let finalResult = ''; // 最终结果文本
+
+            // ============================================================
+            //  DOM 引用
+            // ============================================================
+            const questionArea = document.getElementById('question-area');
+            const resultArea = document.getElementById('result-area');
+            const questionText = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('optionsContainer');
+            const stepNum = document.getElementById('stepNum');
+            const stepLabel = document.getElementById('stepLabel');
+            const progressFill = document.getElementById('progressFill');
+            const resultText = document.getElementById('result-text');
+            const shareBtn = document.getElementById('shareBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDesc = document.getElementById('modalDesc');
+            const modalFooter = document.getElementById('modalFooter');
+            const blockOverlay = document.getElementById('blockOverlay');
+            const toast = document.getElementById('toast');
+            const progressArea = document.getElementById('progressArea');
+
+            let toastTimer = null;
+
+            // ============================================================
+            //  工具
+            // ============================================================
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            function pickRandom(arr) {
+                return arr[Math.floor(Math.random() * arr.length)];
+            }
+
+            function getResultText() {
+                if (sheepResult) return '咩咩咩';
+                const chosen = pickRandom(RESULTS);
+                return chosen.text;
+            }
+
+            function getShareText() {
+                const r = sheepResult ? '咩咩咩' : finalResult;
+                return r + ' ' + SITE_URL;
+            }
+
+            // ============================================================
+            //  Toast
+            // ============================================================
+            function showToast(msg, duration) {
+                duration = duration || 2200;
+                toast.textContent = msg;
+                toast.classList.add('show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(function() {
+                    toast.classList.remove('show');
+                }, duration);
+            }
+
+            // ============================================================
+            //  模态对话框
+            // ============================================================
+            function showModal(icon, title, desc, buttons) {
+                return new Promise(function(resolve) {
+                    modalIcon.textContent = icon || '⚠';
+                    modalTitle.textContent = title || '提示';
+                    modalDesc.innerHTML = desc || '';
+                    modalFooter.innerHTML = '';
+                    buttons.forEach(function(b) {
+                        const btn = document.createElement('button');
+                        btn.textContent = b.label;
+                        if (b.primary) btn.classList.add('primary');
+                        if (b.danger) btn.classList.add('danger');
+                        btn.addEventListener('click', function() {
+                            modalOverlay.classList.remove('show');
+                            resolve(b.value);
+                        });
+                        modalFooter.appendChild(btn);
+                    });
+                    modalOverlay.classList.add('show');
+                });
+            }
+
+            function showSimpleModal(icon, title, desc) {
+                return showModal(icon, title, desc, [
+                    { label: '确定', value: 'ok', primary: true }
+                ]);
+            }
+
+            // ============================================================
+            //  渲染问题
+            // ============================================================
+            function renderQuestion(index) {
+                // 清除之前的选择状态
+                const q = QUESTIONS[index];
+                if (!q) return;
+
+                // 更新进度
+                const displayNum = index + 1;
+                stepNum.textContent = displayNum + '/' + TOTAL_QS;
+                stepLabel.textContent = '问题';
+                const pct = ((index) / TOTAL_QS) * 100;
+                progressFill.style.width = pct + '%';
+
+                // 显示问题区，隐藏结果区
+                questionArea.style.display = 'flex';
+                resultArea.classList.remove('show');
+
+                // 问题文本
+                let qText = '<span class="q-number">' + displayNum + '.</span> ' + q.text;
+                questionText.innerHTML = qText;
+
+                // 清空选项
+                optionsContainer.innerHTML = '';
+
+                if (q.type === 'choice') {
+                    const optDiv = document.createElement('div');
+                    optDiv.className = 'options';
+                    q.options.forEach(function(opt) {
+                        const btn = document.createElement('button');
+                        btn.className = 'opt-btn';
+                        btn.textContent = opt.label;
+                        btn.dataset.value = opt.value;
+                        btn.addEventListener('click', function() {
+                            // 移除其他选中样式
+                            optDiv.querySelectorAll('.opt-btn').forEach(b => b.classList.remove(
+                            'selected'));
+                            btn.classList.add('selected');
+                            // 处理选择
+                            handleChoice(q.id, opt.value);
+                        });
+                        optDiv.appendChild(btn);
+                    });
+                    optionsContainer.appendChild(optDiv);
+                } else if (q.type === 'input') {
+                    const group = document.createElement('div');
+                    group.className = 'input-group';
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = q.placeholder || '请输入…';
+                    input.id = 'inputField';
+                    const confirmBtn = document.createElement('button');
+                    confirmBtn.className = 'confirm-btn';
+                    confirmBtn.textContent = '确认';
+                    confirmBtn.addEventListener('click', function() {
+                        const val = input.value.trim();
+                        if (val === '') {
+                            showToast('请输入内容再确认', 1500);
+                            return;
+                        }
+                        handleInput(q.id, val);
+                    });
+                    input.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            confirmBtn.click();
+                        }
+                    });
+                    group.appendChild(input);
+                    group.appendChild(confirmBtn);
+                    optionsContainer.appendChild(group);
+                    // 自动聚焦
+                    setTimeout(function() { input.focus(); }, 80);
+                }
+            }
+
+            // ============================================================
+            //  处理选择 / 输入
+            // ============================================================
+            function handleChoice(qId, value) {
+                answers[qId] = value;
+
+                // ----- 特殊逻辑 -----
+                // 问题1: 满18岁
+                if (qId === 1) {
+                    if (value === 'yes') {
+                        // 禁止访问
+                        isBlocked = true;
+                        blockOverlay.classList.add('show');
+                        return;
+                    } else {
+                        // no → 继续
+                        goToNext();
+                        return;
+                    }
+                }
+
+                // 问题2: 爱上一只羊
+                if (qId === 2) {
+                    if (value === 'yes') {
+                        // 跳转到结果，显示咩咩咩
+                        sheepResult = true;
+                        isSheepMode = true;
+                        showResult();
+                        return;
+                    } else {
+                        // no → 继续
+                        goToNext();
+                        return;
+                    }
+                }
+
+                // 问题3: 舔手肘
+                if (qId === 3) {
+                    if (value === 'yes') {
+                        // 弹出摄像头权限弹窗
+                        showCameraModal().then(function() {
+                            // 弹窗关闭后继续
+                            goToNext();
+                        });
+                        return;
+                    } else {
+                        goToNext();
+                        return;
+                    }
+                }
+
+                // 问题7: 喜欢女孩还是男孩
+                if (qId === 7) {
+                    if (value === '女孩') {
+                        showSimpleModal('!', 'lala', '！？lala？！').then(function() {
+                            goToNext();
+                        });
+                        return;
+                    } else if (value === '男孩') {
+                        showSimpleModal('!', '提示', '思想不要太封建，生男生女都一样').then(function() {
+                            goToNext();
+                        });
+                        return;
+                    }
+                }
+
+                // 其他普通选择 → 继续
+                goToNext();
+            }
+
+            function handleInput(qId, value) {
+                answers[qId] = value;
+                // 问题14 → 继续
+                goToNext();
+            }
+
+            // ============================================================
+            //  摄像头权限弹窗（虚假）
+            // ============================================================
+            function showCameraModal() {
+                return new Promise(function(resolve) {
+                    const icon = '📷';
+                    const title = '摄像头权限请求';
+                    const desc = '是否允许此应用访问您的摄像头？<br><span style="color:#666;font-size:14px;">（这是一个虚假的权限请求，仅供娱乐）</span>';
+                    showModal(icon, title, desc, [
+                        { label: '允许', value: 'allow', primary: true },
+                        { label: '拒绝', value: 'deny' }
+                    ]).then(function(result) {
+                        if (result === 'allow') {
+                            showToast('已允许摄像头访问（开玩笑的）', 1500);
+                        } else {
+                            showToast('已拒绝摄像头访问', 1200);
+                        }
+                        resolve();
+                    });
+                });
+            }
+
+            // ============================================================
+            //  跳转
+            // ============================================================
+            function goToNext() {
+                if (isBlocked) return;
+                if (isSheepMode) return;
+                const next = currentIndex + 1;
+                if (next >= TOTAL_QS) {
+                    // 所有问题完成 → 显示结果
+                    showResult();
+                } else {
+                    currentIndex = next;
+                    renderQuestion(currentIndex);
+                }
+            }
+
+            // ============================================================
+            //  显示结果
+            // ============================================================
+            function showResult() {
+                questionArea.style.display = 'none';
+                resultArea.classList.add('show');
+                progressFill.style.width = '100%';
+                stepNum.textContent = '完成';
+                stepLabel.textContent = '结果';
+
+                let resultValue = '';
+                if (sheepResult) {
+                    resultValue = '咩咩咩';
+                } else {
+                    finalResult = getResultText();
+                    resultValue = finalResult;
+                }
+
+                // 如果还没有finalResult，设置
+                if (!finalResult && !sheepResult) {
+                    finalResult = resultValue;
+                }
+
+                resultText.innerHTML = '<span class="result-label">你的 MBTI 人格是</span><span class="result-value">' +
+                    resultValue + '</span>';
+            }
+
+            // ============================================================
+            //  重新开始
+            // ============================================================
+            function resetTest() {
+                // 重置状态
+                currentIndex = 0;
+                answers = {};
+                isBlocked = false;
+                isSheepMode = false;
+                sheepResult = false;
+                finalResult = '';
+                blockOverlay.classList.remove('show');
+                modalOverlay.classList.remove('show');
+                toast.classList.remove('show');
+                clearTimeout(toastTimer);
+
+                // 隐藏结果，显示问题
+                resultArea.classList.remove('show');
+                questionArea.style.display = 'flex';
+                renderQuestion(0);
+            }
+
+            // ============================================================
+            //  分享
+            // ============================================================
+            function handleShare() {
+                const shareText = getShareText();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(shareText).then(function() {
+                        showToast('已复制结果与链接！', 1800);
+                    }).catch(function() {
+                        fallbackCopy(shareText);
+                    });
+                } else {
+                    fallbackCopy(shareText);
+                }
+            }
+
+            function fallbackCopy(text) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('已复制结果与链接！', 1800);
+                } catch (e) {
+                    showToast('复制失败，请手动复制：' + text, 3000);
+                }
+                document.body.removeChild(ta);
+            }
+
+            // ============================================================
+            //  初始化
+            // ============================================================
+            function init() {
+                renderQuestion(0);
+
+                shareBtn.addEventListener('click', handleShare);
+                restartBtn.addEventListener('click', resetTest);
+
+                // 标题栏按钮（装饰）
+                document.querySelector('.window-controls .close').addEventListener('click', function() {
+                    if (confirm('确定要关闭吗？')) {
+                        document.getElementById('appWindow').style.opacity = '0.3';
+                        document.getElementById('appWindow').style.pointerEvents = 'none';
+                        showToast('窗口已冻结 (假的)', 2000);
+                    }
+                });
+                document.querySelector('.window-controls .minimize').addEventListener('click', function() {
+                    document.getElementById('appWindow').style.transform = 'scale(0.95)';
+                    document.getElementById('appWindow').style.opacity = '0.5';
+                    setTimeout(function() {
+                        document.getElementById('appWindow').style.transform = 'scale(1)';
+                        document.getElementById('appWindow').style.opacity = '1';
+                    }, 400);
+                    showToast('最小化动画 (假的)', 1000);
+                });
+                document.querySelector('.window-controls .maximize').addEventListener('click', function() {
+                    const w = document.getElementById('appWindow');
+                    if (w.style.width === '98vw') {
+                        w.style.width = '680px';
+                        w.style.maxWidth = '94vw';
+                        showToast('还原窗口', 800);
+                    } else {
+                        w.style.width = '98vw';
+                        w.style.maxWidth = '98vw';
+                        showToast('最大化 (假的)', 800);
+                    }
+                });
+            }
+
+            // 页面加载完成后初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+
+</body>
+</html>
