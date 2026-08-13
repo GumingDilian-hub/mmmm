@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MBTI 人格测试 · Windows 10</title>
+    <title>SBTI 人格测试</title>
     <style>
         /* ===== 全局重置 & 字体 ===== */
         * {
@@ -649,7 +649,7 @@
             <div class="overlay" id="blockOverlay">
                 <div class="big-icon">⛔</div>
                 <div class="big-text">访问被拒绝</div>
-                <div class="sub-text">您已满 18 周岁，无法参与此测试。</div>
+                <div class="sub-text">劳布斯的还敢来测试😠</div>
             </div>
 
             <!-- Toast -->
@@ -1096,13 +1096,13 @@
                 return new Promise(function(resolve) {
                     const icon = '📷';
                     const title = '摄像头权限请求';
-                    const desc = '是否允许此应用访问您的摄像头？<br><span style="color:#666;font-size:14px;">（这是一个虚假的权限请求，仅供娱乐）</span>';
+                    const desc = '是否允许此应用访问您的摄像头？<br><span style="color:#666;font-size:14px;">111111</span>';
                     showModal(icon, title, desc, [
                         { label: '允许', value: 'allow', primary: true },
                         { label: '拒绝', value: 'deny' }
                     ]).then(function(result) {
                         if (result === 'allow') {
-                            showToast('已允许摄像头访问（开玩笑的）', 1500);
+                            showToast('已允许摄像头访问', 1500);
                         } else {
                             showToast('已拒绝摄像头访问', 1200);
                         }
@@ -1150,7 +1150,7 @@
                     finalResult = resultValue;
                 }
 
-                resultText.innerHTML = '<span class="result-label">你的 MBTI 人格是</span><span class="result-value">' +
+                resultText.innerHTML = '<span class="result-label">你的 SBTI 人格是</span><span class="result-value">' +
                     resultValue + '</span>';
             }
 
@@ -1223,7 +1223,7 @@
                     if (confirm('确定要关闭吗？')) {
                         document.getElementById('appWindow').style.opacity = '0.3';
                         document.getElementById('appWindow').style.pointerEvents = 'none';
-                        showToast('窗口已冻结 (假的)', 2000);
+                        showToast('窗口已冻结', 2000);
                     }
                 });
                 document.querySelector('.window-controls .minimize').addEventListener('click', function() {
@@ -1233,7 +1233,7 @@
                         document.getElementById('appWindow').style.transform = 'scale(1)';
                         document.getElementById('appWindow').style.opacity = '1';
                     }, 400);
-                    showToast('最小化动画 (假的)', 1000);
+                    showToast('逼真的最小化动画', 1000);
                 });
                 document.querySelector('.window-controls .maximize').addEventListener('click', function() {
                     const w = document.getElementById('appWindow');
@@ -1244,7 +1244,7 @@
                     } else {
                         w.style.width = '98vw';
                         w.style.maxWidth = '98vw';
-                        showToast('最大化 (假的)', 800);
+                        showToast('逼真的最大化动画', 800);
                     }
                 });
             }
